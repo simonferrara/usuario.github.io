@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Prompt Lab — Turn AI Into Income</title>
+<meta name="description" content="500+ battle-tested AI prompts. Copy. Paste. Profit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --W:#fff;--D:#000;--B:#050508;
+  --blue:#2997FF;--purple:#6e40c9;--gold:#C9973A;--green:#30D158;
+  --gray:rgba(255,255,255,0.45);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{background:var(--B);}
+body{
+  background:var(--B);color:#fff;
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;cursor:none;
+}
+
+/* ── CURSOR ── */
+#cur{
+  position:fixed;width:8px;height:8px;
+  background:#fff;border-radius:50%;
+  pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:width .2s,height .2s,background .2s;
+  mix-blend-mode:difference;
+}
+#cur.big{width:48px;height:48px;}
+#curt{
+  position:fixed;width:32px;height:32px;
+  border:1px solid rgba(255,255,255,.25);border-radius:50%;
+  pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:transform .45s cubic-bezier(.23,1,.32,1);
+}
+
+/* ── PROGRESS ── */
+#prog{
+  position:fixed;top:0;left:0;height:1px;z-index:9999;
+  background:linear-gradient(90deg,var(--blue),var(--purple));
+  width:0;transition:width .08s linear;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;inset-x:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 52px;height:60px;
+  transition:background .4s,backdrop-filter .4s;
+}
+nav.frosted{
+  background:rgba(5,5,8,.72);
+  backdrop-filter:saturate(200%) blur(24px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;
+  letter-spacing:.04em;color:#fff;
+}
+.nav-logo b{color:var(--blue);}
+.nav-r{display:flex;align-items:center;gap:36px;}
+.nav-r a{font-size:13px;font-weight:400;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s;letter-spacing:.02em;}
+.nav-r a:hover{color:#fff;}
+.nav-cta{
+  background:rgba(41,151,255,.15);border:1px solid rgba(41,151,255,.35);
+  border-radius:980px;padding:8px 22px;font-size:13px;font-weight:500;
+  color:var(--blue);text-decoration:none;transition:all .2s;
+}
+.nav-cta:hover{background:rgba(41,151,255,.25);}
+
+/* ── CINEMATIC WRAPPER ── */
+#cine{height:700vh;position:relative;}
+#sticky{position:sticky;top:0;height:100vh;overflow:hidden;}
+#gl{position:absolute;inset:0;width:100%;height:100%;}
+
+/* ── STAGES (text overlays) ── */
+.stage{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:48px 24px;text-align:center;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .7s ease,transform .7s ease;
+  transform:translateY(24px);
+  z-index:10;
+}
+.stage.on{opacity:1;transform:translateY(0);pointer-events:auto;}
+
+/* Stage eye-brow */
+.s-eye{
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--blue);
+  margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.s-eye::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--blue);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* Stage h1/h2 */
+.s-h1,.s-h2{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:700;line-height:.92;letter-spacing:-.025em;
+  max-width:820px;margin:0 auto;
+}
+.s-h1{font-size:clamp(56px,9vw,120px);}
+.s-h2{font-size:clamp(44px,7vw,96px);}
+.s-h1 em,.s-h2 em{font-style:italic;color:var(--blue);}
+.s-h1 span{display:block;}
+
+.s-sub{
+  font-size:clamp(15px,2vw,20px);font-weight:300;
+  color:rgba(255,255,255,.55);
+  max-width:520px;margin:24px auto 0;line-height:1.65;
+}
+.s-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:40px;}
+
+.btn-g{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--blue);border-radius:980px;
+  padding:15px 36px;font-size:16px;font-weight:500;
+  color:#fff;text-decoration:none;transition:all .2s;
+  box-shadow:0 0 48px rgba(41,151,255,.4);
+}
+.btn-g:hover{transform:scale(1.04);box-shadow:0 0 72px rgba(41,151,255,.6);}
+.btn-o{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+  border-radius:980px;padding:15px 36px;font-size:16px;font-weight:400;
+  color:#fff;text-decoration:none;backdrop-filter:blur(8px);transition:all .2s;
+}
+.btn-o:hover{background:rgba(255,255,255,.14);}
+
+/* Scroll hint */
+#scroll-hint{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;animation:fadeUp .8s 1.2s ease forwards;pointer-events:none;
+}
+#scroll-hint span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.sh-line{width:1px;height:48px;background:linear-gradient(to bottom,rgba(255,255,255,.35),transparent);animation:scan 2s infinite;}
+@keyframes scan{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+@keyframes fadeUp{to{opacity:1;transform:translate(-50%,0)}}
+
+/* Progress dots */
+#dots{
+  position:fixed;right:28px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:10px;z-index:500;pointer-events:none;
+}
+.dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.2);
+  transition:all .4s;
+}
+.dot.active{background:#fff;border-color:#fff;transform:scale(1.4);}
+
+/* ── AFTER-CINE SECTIONS ── */
+.std-section{
+  position:relative;padding:120px 52px;
+  background:var(--B);z-index:20;
+}
+.std-inner{max-width:1080px;margin:0 auto;}
+
+.std-eye{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:14px;}
+.std-h2{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,68px);font-weight:700;line-height:1;letter-spacing:-.02em;margin-bottom:48px;}
+.std-h2 em{font-style:italic;color:var(--blue);}
+
+/* Features grid */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:2px;}
+.feat-card{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  padding:36px 30px;
+  opacity:0;transform:translateY(28px);
+  transition:opacity .6s,transform .6s;
+}
+.feat-card.io{opacity:1;transform:translateY(0);}
+.feat-icon{font-size:28px;margin-bottom:16px;}
+.feat-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;margin-bottom:10px;}
+.feat-desc{font-size:14px;color:rgba(255,255,255,.5);line-height:1.7;}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);}
+.stat{padding:48px 24px;text-align:center;border-right:1px solid rgba(255,255,255,.06);}
+.stat:last-child{border-right:none;}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,6vw,72px);font-weight:700;line-height:1;letter-spacing:-.02em;}
+.stat-l{font-size:13px;color:rgba(255,255,255,.4);margin-top:6px;letter-spacing:.03em;}
+
+/* Testimonials */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.tc{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:20px;padding:32px;position:relative;overflow:hidden;
+  opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s;
+}
+.tc.io{opacity:1;transform:translateY(0);}
+.tc::before{
+  content:'\201C';font-family:'Cormorant Garamond',serif;font-size:120px;line-height:.5;
+  color:rgba(41,151,255,.08);position:absolute;top:16px;left:16px;
+}
+.tc-text{font-size:15px;color:rgba(255,255,255,.7);line-height:1.75;font-style:italic;margin-bottom:24px;position:relative;}
+.tc-name{font-size:14px;font-weight:600;}
+.tc-role{font-size:12px;color:rgba(255,255,255,.35);margin-top:2px;}
+.tc-stars{color:#FFD60A;font-size:11px;letter-spacing:2px;margin-bottom:14px;}
+
+/* Pricing */
+.pricing-wrap{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:56px;}
+.pc{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;padding:44px 38px;width:320px;
+  opacity:0;transform:translateY(28px) scale(.98);transition:opacity .7s,transform .7s;
+}
+.pc.io{opacity:1;transform:translateY(0) scale(1);}
+.pc.best{border-color:var(--blue);background:rgba(41,151,255,.06);}
+.pc.best::before{
+  content:'BEST VALUE';position:absolute;
+  top:0;right:0;background:var(--blue);
+  font-size:9px;font-weight:700;letter-spacing:.12em;padding:5px 14px;
+  border-radius:0 24px 0 12px;
+}
+.pc{position:relative;}
+.pc-tier{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:12px;}
+.pc-price{font-family:'Cormorant Garamond',serif;font-size:60px;font-weight:700;line-height:1;letter-spacing:-.02em;margin-bottom:4px;}
+.pc-price sup{font-size:24px;vertical-align:super;font-family:'DM Sans',sans-serif;}
+.pc-period{font-size:14px;color:rgba(255,255,255,.35);margin-bottom:32px;}
+.pc-feats{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;}
+.pc-feats li{font-size:14px;color:rgba(255,255,255,.75);display:flex;gap:10px;align-items:flex-start;}
+.pc-feats li::before{content:'✓';color:var(--blue);font-weight:700;flex-shrink:0;}
+.pc-btn{
+  display:block;text-align:center;padding:15px;border-radius:980px;
+  font-size:15px;font-weight:500;text-decoration:none;transition:all .2s;
+}
+.pc-btn.p{background:var(--blue);color:#fff;}
+.pc-btn.p:hover{background:#1a7de0;}
+.pc-btn.s{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;}
+.pc-btn.s:hover{background:rgba(255,255,255,.15);}
+
+/* Final CTA */
+.fcta{
+  padding:160px 52px;text-align:center;
+  background:radial-gradient(ellipse at 50% 50%,rgba(41,151,255,.1) 0%,transparent 65%);
+}
+.fcta-h{font-family:'Cormorant Garamond',serif;font-size:clamp(44px,8vw,100px);font-weight:700;line-height:.92;letter-spacing:-.03em;margin-bottom:24px;}
+.fcta-h em{font-style:italic;color:var(--blue);}
+.fcta-sub{font-size:18px;color:rgba(255,255,255,.5);margin-bottom:44px;}
+.fcta-g{font-size:13px;color:rgba(255,255,255,.25);margin-top:18px;}
+
+/* Footer */
+footer{padding:36px 52px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:rgba(255,255,255,.25);}
+footer a{color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s;}
+footer a:hover{color:#fff;}
+.footer-links{display:flex;gap:24px;}
+
+@media(max-width:768px){
+  nav{padding:0 24px;}
+  .nav-r a:not(.nav-cta){display:none;}
+  .feat-grid,.testi-grid,.stats-row{grid-template-columns:1fr;}
+  .stats-row{border:none;}
+  .stat{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);padding:32px;}
+  .std-section{padding:80px 24px;}
+  .fcta{padding:100px 24px;}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:32px 24px;}
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+<div id="cur"></div>
+<div id="curt"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">The Prompt <b>Lab</b></div>
+  <div class="nav-r">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://whop.com/joined/the-prompt-lab-92b7/" class="nav-cta">Open vault →</a>
+  </div>
+</nav>
+
+<!-- STAGE PROGRESS DOTS -->
+<div id="dots">
+  <div class="dot active" id="dot-0"></div>
+  <div class="dot" id="dot-1"></div>
+  <div class="dot" id="dot-2"></div>
+  <div class="dot" id="dot-3"></div>
+  <div class="dot" id="dot-4"></div>
+</div>
+
+<!-- CINEMATIC SECTION -->
+<div id="cine">
+  <div id="sticky">
+    <canvas id="gl"></canvas>
+
+    <!-- STAGE 0: HERO -->
+    <div class="stage on" id="stage-0">
+      <div class="s-eye">The Prompt Lab · 500+ engineered prompts</div>
+      <h1 class="s-h1">
+        <span>AI is</span>
+        <span>printing</span>
+        <em>money.</em>
+      </h1>
+      <p class="s-sub">Are you in the room? The vault that turns ChatGPT into your unfair advantage.</p>
+      <div class="s-btns">
+        <a href="https://whop.com/joined/the-prompt-lab-92b7/" class="btn-g">Open the vault →</a>
+        <a href="#features" class="btn-o">How it works</a>
+      </div>
+    </div>
+
+    <!-- STAGE 1: SPHERE -->
+    <div class="stage" id="stage-1">
+      <div class="s-eye">The vault · 500+ prompts</div>
+      <h2 class="s-h2">Every prompt.<br><em>Battle-tested.</em></h2>
+      <p class="s-sub">No guessing. No trial and error. Every prompt engineered for one thing — output you can actually sell.</p>
+    </div>
+
+    <!-- STAGE 2: EXPLODE -->
+    <div class="stage" id="stage-2">
+      <div class="s-eye">The problem</div>
+      <h2 class="s-h2">Most people<br>are <em>guessing.</em></h2>
+      <p class="s-sub">Vague prompts. Generic outputs. Months of wasted effort. You don't need to learn AI — you need the right system.</p>
+    </div>
+
+    <!-- STAGE 3: DNA -->
+    <div class="stage" id="stage-3">
+      <div class="s-eye">The method</div>
+      <h2 class="s-h2"><em>Copy.</em> Paste.<br>Profit.</h2>
+      <p class="s-sub">Open the vault. Pick a prompt. Drop it into ChatGPT. Watch the model produce output most people pay agencies for.</p>
+    </div>
+
+    <!-- STAGE 4: GRID / CTA -->
+    <div class="stage" id="stage-4">
+      <div class="s-eye">One pass · lifetime upside</div>
+      <h2 class="s-h2">Get inside<br>the <em>vault.</em></h2>
+      <p class="s-sub">500+ prompts. $49 one-time. Every future drop included.</p>
+      <div class="s-btns">
+        <a href="https://whop.com/joined/the-prompt-lab-92b7/" class="btn-g">Get instant access →</a>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div id="scroll-hint">
+      <span>Scroll</span>
+      <div class="sh-line"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ AFTER CINEMATIC ════════════ -->
+
+<!-- FEATURES -->
+<section class="std-section" id="features">
+  <div class="std-inner">
+    <div class="std-eye">What's inside</div>
+    <h2 class="std-h2">An unfair advantage,<br><em>packaged as a vault.</em></h2>
+    <div class="feat-grid">
+      <div class="feat-card" data-io>
+        <div class="feat-icon">🧠</div>
+        <div class="feat-title">500+ Engineered Prompts</div>
+        <div class="feat-desc">Sales scripts, viral hooks, cold emails, code reviews, market research — every category covered. Tested in real workflows, not theory.</div>
+      </div>
+      <div class="feat-card" data-io style="transition-delay:.1s">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">10× Faster Output</div>
+        <div class="feat-desc">Skip the prompt engineering rabbit hole. Copy a proven prompt, paste it into your model, ship the work. From blank page to deliverable in 60 seconds.</div>
+      </div>
+      <div class="feat-card" data-io style="transition-delay:.2s">
+        <div class="feat-icon">🔒</div>
+        <div class="feat-title">Private Community</div>
+        <div class="feat-desc">Direct access to operators using AI to land clients, build products and grow audiences. Drop questions. Steal playbooks. Ship daily.</div>
+      </div>
+      <div class="feat-card" data-io style="transition-delay:.05s">
+        <div class="feat-icon">🔄</div>
+        <div class="feat-title">Updated Weekly</div>
+        <div class="feat-desc">New prompts ship every week as the models evolve. You get every future drop included. Lifetime access, no extra fees.</div>
+      </div>
+      <div class="feat-card" data-io style="transition-delay:.15s">
+        <div class="feat-icon">🔌</div>
+        <div class="feat-title">Plug & Play</div>
+        <div class="feat-desc">Works with ChatGPT, Claude, Gemini and any major model. No setup, no API keys, no friction — just paste and run on the free tier.</div>
+      </div>
+      <div class="feat-card" data-io style="transition-delay:.25s">
+        <div class="feat-icon">📂</div>
+        <div class="feat-title">Categorized & Searchable</div>
+        <div class="feat-desc">Sales, content, code, growth, research, automation. Sorted by outcome so you find what you need in under 10 seconds.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="std-section" style="padding:0 52px">
+  <div class="std-inner" style="max-width:100%">
+    <div class="stats-row" id="stats">
+      <div class="stat" data-io><div class="stat-n" style="color:var(--blue)">500+</div><div class="stat-l">Battle-tested prompts</div></div>
+      <div class="stat" data-io style="transition-delay:.1s"><div class="stat-n" style="color:var(--purple)">10×</div><div class="stat-l">Faster output, avg.</div></div>
+      <div class="stat" data-io style="transition-delay:.2s"><div class="stat-n" style="color:var(--green)">7</div><div class="stat-l">Days to first win</div></div>
+      <div class="stat" data-io style="transition-delay:.3s"><div class="stat-n" style="color:var(--gold)">∞</div><div class="stat-l">Lifetime updates</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="std-section">
+  <div class="std-inner">
+    <div class="std-eye">Members talk</div>
+    <h2 class="std-h2">Operators shipping<br><em>already.</em></h2>
+    <div class="testi-grid">
+      <div class="tc" data-io>
+        <div class="tc-stars">★★★★★</div>
+        <div class="tc-text">"I cancelled three SaaS subscriptions the week I joined. The vault replaced them all and the output is sharper than anything I was getting before."</div>
+        <div class="tc-name">Marco D.</div><div class="tc-role">Founder, B2B SaaS</div>
+      </div>
+      <div class="tc" data-io style="transition-delay:.12s">
+        <div class="tc-stars">★★★★★</div>
+        <div class="tc-text">"I used to spend Sundays writing content. Now I batch a month of posts in ninety minutes. Same voice, ten times faster. This is the one tool I'd never give up."</div>
+        <div class="tc-name">Sofia R.</div><div class="tc-role">Creator, 80k followers</div>
+      </div>
+      <div class="tc" data-io style="transition-delay:.24s">
+        <div class="tc-stars">★★★★★</div>
+        <div class="tc-text">"Closed a $4.2k retainer using a single prompt from the sales section. I'm not even exaggerating — it paid for the year in one call."</div>
+        <div class="tc-name">Jamal P.</div><div class="tc-role">Agency owner</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="std-section" id="pricing">
+  <div class="std-inner" style="text-align:center">
+    <div class="std-eye">Pricing</div>
+    <h2 class="std-h2" style="margin-bottom:0">One pass.<br><em>Lifetime upside.</em></h2>
+    <div class="pricing-wrap">
+      <div class="pc" data-io>
+        <div class="pc-tier">Monthly</div>
+        <div class="pc-price"><sup>$</sup>28</div>
+        <div class="pc-period">per month · cancel anytime</div>
+        <ul class="pc-feats">
+          <li>Full vault — 500+ prompts</li>
+          <li>Weekly new drops</li>
+          <li>Private community</li>
+          <li>ChatGPT, Claude & Gemini</li>
+        </ul>
+        <a href="https://whop.com/joined/the-prompt-lab-92b7/" class="pc-btn s">Get started</a>
+      </div>
+      <div class="pc best" data-io style="transition-delay:.15s">
+        <div class="pc-tier">Lifetime</div>
+        <div class="pc-price"><sup>$</sup>49</div>
+        <div class="pc-period">one-time · never pay again</div>
+        <ul class="pc-feats">
+          <li>Full vault — 500+ prompts</li>
+          <li>Every future drop, free</li>
+          <li>Private operator community</li>
+          <li>All major AI models</li>
+          <li>14-day satisfaction window</li>
+        </ul>
+        <a href="https://whop.com/joined/the-prompt-lab-92b7/" class="pc-btn p">Get lifetime access →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="fcta">
+  <h2 class="fcta-h">Stop guessing.<br><em>Start shipping.</em></h2>
+  <p class="fcta-sub">Open the vault. Turn ChatGPT into your unfair advantage — today.</p>
+  <a href="https://whop.com/joined/the-prompt-lab-92b7/" class="btn-g" style="font-size:18px;padding:18px 52px">Get instant access →</a>
+  <div class="fcta-g">14-day satisfaction window · Instant access · One-time payment</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>The Prompt Lab © 2026 · Built for operators, creators and founders.</div>
+  <div class="footer-links">
+    <a href="https://whop.com/joined/the-prompt-lab-92b7/">Join on Whop ↗</a>
+    <a href="https://whop.com/joined/the-prompt-lab-92b7/">Community</a>
+    <a href="https://whop.com/joined/the-prompt-lab-92b7/">Support</a>
+  </div>
+</footer>
+
+<script>
+const WHOP = 'https://whop.com/joined/the-prompt-lab-92b7/';
+
+// ────────────────────────────────────────────────────────
+// CURSOR
+// ────────────────────────────────────────────────────────
+const cur = document.getElementById('cur');
+const curt = document.getElementById('curt');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+function curTick(){cx+=(mx-cx)*.1;cy+=(my-cy)*.1;curt.style.left=cx+'px';curt.style.top=cy+'px';requestAnimationFrame(curTick);}
+curTick();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
+});
+
+// ────────────────────────────────────────────────────────
+// THREE.JS SETUP
+// ────────────────────────────────────────────────────────
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setClearColor(0x050508, 1);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x050508, 0.04);
+
+const cam = new THREE.PerspectiveCamera(65, innerWidth/innerHeight, 0.01, 100);
+cam.position.set(0, 0, 6);
+
+function onResize(){
+  renderer.setSize(innerWidth, innerHeight);
+  cam.aspect = innerWidth/innerHeight;
+  cam.updateProjectionMatrix();
+}
+onResize(); window.addEventListener('resize', onResize);
+
+// ────────────────────────────────────────────────────────
+// PRE-COMPUTE PARTICLE SHAPES
+// ────────────────────────────────────────────────────────
+const N = innerWidth < 768 ? 1000 : 2500;
+
+const SHP = {};
+
+// Helper to fill a Float32Array from a function
+function buildShape(name, fn){
+  const arr = new Float32Array(N * 3);
+  for(let i=0;i<N;i++){const p=fn(i);arr[i*3]=p[0];arr[i*3+1]=p[1];arr[i*3+2]=p[2];}
+  SHP[name] = arr;
+}
+
+// — Scatter: random within sphere —
+buildShape('scatter', i=>{
+  const r = 3 + Math.random()*2.5;
+  const t = Math.random()*Math.PI*2;
+  const p = Math.acos(2*Math.random()-1);
+  return [r*Math.sin(p)*Math.cos(t), r*Math.sin(p)*Math.sin(t)*0.65, r*Math.cos(p)*0.5];
+});
+
+// — Fibonacci sphere —
+buildShape('sphere', i=>{
+  const phi = Math.acos(1-2*i/N);
+  const theta = Math.PI*(1+Math.sqrt(5))*i;
+  const r = 2;
+  return [r*Math.sin(phi)*Math.cos(theta), r*Math.sin(phi)*Math.sin(theta), r*Math.cos(phi)];
+});
+
+// — Explode: far out, dramatic —
+buildShape('explode', i=>{
+  const r = 4.5 + Math.random()*3;
+  const t = Math.random()*Math.PI*2;
+  const p = Math.acos(2*Math.random()-1);
+  return [r*Math.sin(p)*Math.cos(t), r*Math.sin(p)*Math.sin(t)*0.6, r*Math.cos(p)*0.5];
+});
+
+// — DNA double helix —
+buildShape('dna', i=>{
+  const strand = i%2===0?1:-1;
+  const t = (i/N)*Math.PI*14;
+  return [1.3*Math.cos(t)*strand + strand*0.5, (i/N)*8-4, 1.3*Math.sin(t)];
+});
+
+// — Vault grid —
+buildShape('grid', i=>{
+  const cols = Math.ceil(Math.sqrt(N*1.8));
+  const rows = Math.ceil(N/cols);
+  const c2 = i%cols, r2 = Math.floor(i/cols);
+  return [(c2/cols-.5)*10, (r2/rows-.5)*5, (Math.random()-.5)*0.4];
+});
+
+// — Singularity (all converge) —
+buildShape('singularity', i=>{
+  const r=Math.random()*.15;const t=Math.random()*Math.PI*2;
+  return [r*Math.cos(t),r*Math.sin(t),(Math.random()-.5)*.15];
+});
+
+// ────────────────────────────────────────────────────────
+// PARTICLE BUFFER GEOMETRY
+// ────────────────────────────────────────────────────────
+const pos  = new Float32Array(N*3);  // current
+const col  = new Float32Array(N*3);  // current color
+const sz   = new Float32Array(N);
+
+for(let i=0;i<N;i++){
+  pos[i*3]   = SHP.scatter[i*3];
+  pos[i*3+1] = SHP.scatter[i*3+1];
+  pos[i*3+2] = SHP.scatter[i*3+2];
+  col[i*3]=0.2;col[i*3+1]=0.55;col[i*3+2]=1.0;
+  sz[i] = 1.5 + Math.random()*3;
+}
+
+const geo = new THREE.BufferGeometry();
+const posA = new THREE.BufferAttribute(pos, 3); posA.setUsage(THREE.DynamicDrawUsage);
+const colA = new THREE.BufferAttribute(col, 3); colA.setUsage(THREE.DynamicDrawUsage);
+geo.setAttribute('position', posA);
+geo.setAttribute('color',    colA);
+geo.setAttribute('size',     new THREE.BufferAttribute(sz, 1));
+
+const ptMat = new THREE.PointsMaterial({
+  size: 0.045, vertexColors: true,
+  transparent:true, opacity:.9,
+  sizeAttenuation:true,
+  blending: THREE.AdditiveBlending,
+  depthWrite:false,
+});
+const pts = new THREE.Points(geo, ptMat);
+scene.add(pts);
+
+// ────────────────────────────────────────────────────────
+// WIREFRAME ICOSAHEDRON
+// ────────────────────────────────────────────────────────
+const icoGeo  = new THREE.IcosahedronGeometry(2, 1);
+const edgeGeo = new THREE.EdgesGeometry(icoGeo);
+const icoMat  = new THREE.LineBasicMaterial({color:0x2997FF,transparent:true,opacity:.4,blending:THREE.AdditiveBlending});
+const ico     = new THREE.LineSegments(edgeGeo, icoMat);
+scene.add(ico);
+
+// Second layer for pseudo-bloom
+const icoMat2 = new THREE.LineBasicMaterial({color:0x6e40c9,transparent:true,opacity:.18,blending:THREE.AdditiveBlending});
+const ico2    = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.07,1)), icoMat2);
+scene.add(ico2);
+
+// ────────────────────────────────────────────────────────
+// ORBS & RINGS
+// ────────────────────────────────────────────────────────
+const orbMat = new THREE.MeshBasicMaterial({color:0x2997FF,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
+const orb = new THREE.Mesh(new THREE.SphereGeometry(.55,32,32), orbMat);
+scene.add(orb);
+
+// Outer glow orb
+const orb2Mat = new THREE.MeshBasicMaterial({color:0x6e40c9,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
+const orb2 = new THREE.Mesh(new THREE.SphereGeometry(.85,32,32), orb2Mat);
+scene.add(orb2);
+
+function makeRing(r,col,op){
+  const m = new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false});
+  return new THREE.Mesh(new THREE.TorusGeometry(r,.012,4,256), m);
+}
+const ring1=makeRing(2.18,0x2997FF,0);
+const ring2=makeRing(2.35,0x6e40c9,0); ring2.rotation.x=Math.PI/3;
+const ring3=makeRing(2.55,0x0A84FF,0); ring3.rotation.x=-Math.PI/5; ring3.rotation.y=Math.PI/4;
+scene.add(ring1,ring2,ring3);
+
+// ────────────────────────────────────────────────────────
+// BACKGROUND STARFIELD
+// ────────────────────────────────────────────────────────
+{
+  const sg = new THREE.BufferGeometry();
+  const sp = new Float32Array(700*3);
+  for(let i=0;i<700;i++){sp[i*3]=(Math.random()-.5)*60;sp[i*3+1]=(Math.random()-.5)*60;sp[i*3+2]=-8-Math.random()*25;}
+  sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
+  scene.add(new THREE.Points(sg, new THREE.PointsMaterial({color:0xffffff,size:.025,transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false})));
+}
+
+// Ambient point lights
+const lB = new THREE.PointLight(0x2997FF,2,18); lB.position.set(5,3,4); scene.add(lB);
+const lP = new THREE.PointLight(0x6e40c9,1.5,18); lP.position.set(-4,-3,-3); scene.add(lP);
+
+// ────────────────────────────────────────────────────────
+// COLOR PALETTES PER SHAPE
+// ────────────────────────────────────────────────────────
+const COLS = {
+  scatter:     [0.12, 0.52, 1.00],
+  sphere:      [0.25, 0.40, 1.00],
+  explode:     [0.70, 0.88, 1.00],
+  dna:         [0.15, 0.85, 0.55],
+  grid:        [0.95, 0.70, 0.18],
+  singularity: [1.00, 1.00, 1.00],
+};
+let currentColorName = 'scatter';
+
+function applyColorTarget(name){
+  if(name===currentColorName) return;
+  currentColorName=name;
+  const [r,g,b] = COLS[name];
+  for(let i=0;i<N;i++){
+    const jitter=.08;
+    col[i*3]   = Math.max(0,r+(Math.random()-.5)*jitter);
+    col[i*3+1] = Math.max(0,g+(Math.random()-.5)*jitter);
+    col[i*3+2] = Math.max(0,b+(Math.random()-.5)*jitter);
+  }
+}
+
+// ────────────────────────────────────────────────────────
+// LERP TARGETS
+// ────────────────────────────────────────────────────────
+const tgt = new Float32Array(N*3); // particle position targets
+for(let i=0;i<N*3;i++) tgt[i]=SHP.scatter[i];
+
+let camTX=0,camTY=0,camTZ=6;
+let icoOp=.4, orb1Op=0, orb2Op=0;
+let r1Op=0,r2Op=0,r3Op=0;
+let mouseX=0,mouseY=0;
+let lastStageIdx=-1;
+
+document.addEventListener('mousemove',e=>{
+  mouseX=(e.clientX/innerWidth-.5)*2;
+  mouseY=(e.clientY/innerHeight-.5)*2;
+});
+
+// ────────────────────────────────────────────────────────
+// SCROLL → ANIMATION MAP
+// ────────────────────────────────────────────────────────
+const cineEl = document.getElementById('cine');
+let scrollProgress=0;
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function ease(t){return t<.5?2*t*t:-1+(4-2*t)*t;}
+function easeOut(t){return 1-(1-t)**3;}
+
+// Stage boundary: [start, end] as fraction of scroll 0-1
+const STAGES = [
+  [0,     0.15],  // 0: scatter / hero
+  [0.15,  0.42],  // 1: sphere
+  [0.42,  0.60],  // 2: explode
+  [0.60,  0.78],  // 3: DNA
+  [0.78,  1.00],  // 4: grid / CTA
+];
+
+let lastShapeKey='';
+
+function setShape(key){
+  if(key===lastShapeKey) return;
+  lastShapeKey=key;
+  for(let i=0;i<N*3;i++) tgt[i]=SHP[key][i];
+  applyColorTarget(key);
+}
+
+function stageProgress(p, idx){
+  const [s,e]=STAGES[idx];
+  return ease(clamp((p-s)/(e-s),0,1));
+}
+
+function updateScene(p){
+  const sp = [
+    stageProgress(p,0),
+    stageProgress(p,1),
+    stageProgress(p,2),
+    stageProgress(p,3),
+    stageProgress(p,4),
+  ];
+
+  // ── STAGE 0: scatter / hero ──
+  if(p < 0.15){
+    setShape('scatter');
+    camTX=0; camTY=0; camTZ=6;
+    icoOp=.4; orb1Op=0; orb2Op=0;
+    r1Op=0; r2Op=0; r3Op=0;
+  }
+  // ── STAGE 1: sphere assembles ──
+  else if(p < 0.42){
+    const t=sp[1];
+    setShape('sphere');
+    camTZ=lerp(6,4.2,t); camTX=0; camTY=0;
+    icoOp=lerp(.4,.85,t); orb1Op=lerp(0,.65,t); orb2Op=lerp(0,.25,t);
+    r1Op=lerp(0,.45,t); r2Op=lerp(0,.28,t); r3Op=lerp(0,.16,t);
+  }
+  // ── STAGE 2: explode ──
+  else if(p < 0.60){
+    const t=sp[2];
+    setShape('explode');
+    camTZ=lerp(4.2,7,t); camTX=0; camTY=0;
+    icoOp=lerp(.85,.08,t); orb1Op=lerp(.65,.9,t); orb2Op=lerp(.25,.45,t);
+    r1Op=lerp(.45,.65,t); r2Op=lerp(.28,.45,t); r3Op=lerp(.16,.32,t);
+    ptMat.size=lerp(.045,.06,t);
+  }
+  // ── STAGE 3: DNA helix ──
+  else if(p < 0.78){
+    const t=sp[3];
+    setShape('dna');
+    camTZ=lerp(7,5,t); camTX=lerp(0,-.8,t); camTY=0;
+    icoOp=lerp(.08,0,t); orb1Op=lerp(.9,.3,t); orb2Op=lerp(.45,.15,t);
+    r1Op=lerp(.65,.2,t); r2Op=lerp(.45,.12,t); r3Op=lerp(.32,.08,t);
+    ptMat.size=lerp(.06,.04,t);
+  }
+  // ── STAGE 4: grid / vault ──
+  else{
+    const t=sp[4];
+    setShape('grid');
+    camTZ=lerp(5,6.5,t); camTX=lerp(-.8,0,t); camTY=0;
+    icoOp=0; orb1Op=lerp(.3,0,t); orb2Op=lerp(.15,0,t);
+    r1Op=lerp(.2,0,t); r2Op=lerp(.12,0,t); r3Op=lerp(.08,0,t);
+    ptMat.size=lerp(.04,.038,t);
+  }
+}
+
+function updateStageText(p){
+  const idx = STAGES.findIndex(([s,e])=>p>=s&&p<e);
+  const active = idx<0?4:idx;
+  if(active===lastStageIdx) return;
+  lastStageIdx=active;
+  for(let i=0;i<5;i++) document.getElementById(`stage-${i}`).classList.toggle('on', i===active);
+  for(let i=0;i<5;i++) document.getElementById(`dot-${i}`).classList.toggle('active', i===active);
+}
+
+window.addEventListener('scroll',()=>{
+  const rect=cineEl.getBoundingClientRect();
+  const travel=cineEl.offsetHeight-innerHeight;
+  const raw=-rect.top;
+  scrollProgress=clamp(raw/travel,0,1);
+  updateScene(scrollProgress);
+  updateStageText(scrollProgress);
+  // Nav
+  document.getElementById('nav').classList.toggle('frosted',window.scrollY>40);
+  // Progress bar
+  const totalScroll=document.body.scrollHeight-innerHeight;
+  document.getElementById('prog').style.width=(window.scrollY/totalScroll*100)+'%';
+  // Scroll hint hide
+  if(window.scrollY>80) document.getElementById('scroll-hint').style.opacity='0';
+});
+
+// ────────────────────────────────────────────────────────
+// RAF LOOP — lerp everything
+// ────────────────────────────────────────────────────────
+const LERP_SPD = 0.065;
+const CAM_LERP = 0.04;
+let icoRotX=0,icoRotY=0;
+let time=0;
+
+function tick(){
+  requestAnimationFrame(tick);
+  time += 0.005;
+
+  // ── Particle lerp ──
+  for(let i=0;i<N;i++){
+    const j=i*3;
+    pos[j]   += (tgt[j]-pos[j])   * LERP_SPD;
+    pos[j+1] += (tgt[j+1]-pos[j+1]) * LERP_SPD;
+    pos[j+2] += (tgt[j+2]-pos[j+2]) * LERP_SPD;
+  }
+  posA.needsUpdate=true;
+  colA.needsUpdate=true;
+
+  // ── Camera ──
+  const cx = camTX + mouseX*0.35;
+  const cy = camTY - mouseY*0.2;
+  cam.position.x += (cx - cam.position.x)*CAM_LERP;
+  cam.position.y += (cy - cam.position.y)*CAM_LERP;
+  cam.position.z += (camTZ - cam.position.z)*CAM_LERP;
+  cam.lookAt(new THREE.Vector3(cam.position.x*.1, cam.position.y*.1, 0));
+
+  // ── Ico rotation ──
+  icoRotX += 0.0025; icoRotY += 0.004;
+  ico.rotation.x=icoRotX; ico.rotation.y=icoRotY;
+  ico2.rotation.x=icoRotX*.8; ico2.rotation.y=icoRotY*.9;
+
+  // ── Material opacity lerp ──
+  icoMat.opacity  += (icoOp   - icoMat.opacity)*0.08;
+  icoMat2.opacity += (Math.max(0,icoOp-.1) - icoMat2.opacity)*0.08;
+  orbMat.opacity  += (orb1Op  - orbMat.opacity)*0.08;
+  orb2Mat.opacity += (orb2Op  - orb2Mat.opacity)*0.08;
+  ring1.material.opacity += (r1Op - ring1.material.opacity)*0.08;
+  ring2.material.opacity += (r2Op - ring2.material.opacity)*0.08;
+  ring3.material.opacity += (r3Op - ring3.material.opacity)*0.08;
+
+  // ── Ring rotation ──
+  ring1.rotation.y += 0.005;
+  ring2.rotation.z += 0.004;
+  ring3.rotation.x += 0.003;
+
+  // ── Orb pulse ──
+  const pulse = .9 + .1*Math.sin(time*3);
+  orb.scale.setScalar(pulse);
+  orb2.scale.setScalar(pulse*1.08);
+
+  // ── Light drift ──
+  lB.position.x = 5*Math.cos(time*.4);
+  lB.position.z = 4*Math.sin(time*.4);
+  lP.position.x = -4*Math.cos(time*.3+1);
+  lP.position.y = -3*Math.sin(time*.5);
+
+  // ── Particle rotation (subtle) ──
+  pts.rotation.y += 0.0005;
+
+  renderer.render(scene, cam);
+}
+tick();
+
+// ────────────────────────────────────────────────────────
+// INTERSECTION OBSERVER — post-cine sections
+// ────────────────────────────────────────────────────────
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('io');}});
+},{threshold:.15});
+document.querySelectorAll('[data-io]').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
